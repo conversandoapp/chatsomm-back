@@ -150,11 +150,14 @@ app.post('/api/chat', async (req, res) => {
       throw new Error('No assistant response found');
     }
 
-    // Extraer el texto del contenido
-    const responseText = assistantMessage.content
-      .filter(content => content.type === 'text')
-      .map(content => content.text.value)
-      .join('\n');
+// Extraer el texto del contenido y limpiar anotaciones
+let responseText = assistantMessage.content
+  .filter(content => content.type === 'text')
+  .map(content => content.text.value)
+  .join('\n');
+
+// Remover anotaciones de citación (ej: 【4:0†source】)
+responseText = responseText.replace(/【[^】]*】/g, '');
 
     // Responder al frontend
     res.json({
