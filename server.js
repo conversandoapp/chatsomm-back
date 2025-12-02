@@ -8,9 +8,26 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middlewares
+// Lista de orígenes permitidos
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  process.env.WIDGET_URL,
+  'https://chatsomm.onrender.com',
+  'https://chatsomm-widget.onrender.com'
+].filter(Boolean); // Eliminar valores undefined
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || '*',
+  origin: function(origin, callback) {
+    // Permitir peticiones sin origin (como apps móviles o Postman)
+    if (!origin) return callback(null, true);
+    
+    // Verificar si el origin está en la lista de permitidos
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
